@@ -26,10 +26,9 @@ Install with Composer. Do not clone the repository into `web/modules/custom`.
    composer require happiness/ai-skills:^1.0
    ```
 
-   The package type is `drupal-custom-module`, so it is installed to
-   `web/modules/custom/ai_skills` (provided by `composer/installers`, included
-   in the Drupal recommended project template). If the project has no
-   `installer-paths` entry for `type:drupal-custom-module`, add one.
+   The package type is `drupal-module`, so Composer installs it to
+   `web/modules/contrib/ai_skills` (via `composer/installers`, included in the
+   Drupal recommended project template).
 
 3. Enable the module:
 
