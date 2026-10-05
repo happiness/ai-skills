@@ -30,18 +30,6 @@ Install with Composer. Do not clone the repository into `web/modules/custom`.
    `web/modules/contrib/ai_skills` (via `composer/installers`, included in the
    Drupal recommended project template).
 
-3. Enable the module:
-
-   ```bash
-   drush en ai_skills
-   ```
-
-The repository is private. Composer needs access to it, either through an SSH
-key on the machine or a GitHub token:
-
-```bash
-composer config --global github-oauth.github.com <token>
-```
 
 ## Updating
 
