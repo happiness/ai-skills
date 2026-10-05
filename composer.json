@@ -1,0 +1,6 @@
+{
+  "name": "happiness/ai-skills",
+  "description": "Provides custom AI skills for Happiness.",
+  "type": "drupal-module",
+  "license": "GPL-2.0+"
+}

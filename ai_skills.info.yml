@@ -1,0 +1,4 @@
+name: Happiness AI Skills
+core_version_requirement: '>=10'
+description: Provides custom AI skills for Happiness.
+type: module
