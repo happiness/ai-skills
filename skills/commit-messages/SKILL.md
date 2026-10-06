@@ -5,80 +5,64 @@ description: Writes git commit messages in the company style - an English summar
 
 # Commit messages
 
-Commit messages are written in English, like all documentation in this repo.
+Written in English.
 
 ## Format
 
 ```
-<Summary sentence in the present tense, ending with a period.> [touch:<TICKET_ID>]
-<blank line>
-<Body: what changed and why, wrapped at about 72 characters.>
+<Present-tense summary sentence ending with a period.> [touch:<TICKET_ID>]
+
+<Body: what changed and why, wrapped at ~72 characters.>
 ```
 
-### Subject line
+### Subject
 
-- One sentence, capitalised, ending with a period, then a space and the ticket
-  reference.
-- Present tense, starting with a verb: `Adds`, `Fixes`, `Updates`, `Removes`,
-  `Upgrades`. Match the recent history of the repository; `git log -10
-  --format=%s` shows it.
-- Name the thing that changed, not the activity: `Adds membership certificate
+- One capitalised sentence starting with a verb (`Adds`, `Fixes`, `Updates`,
+  `Removes`, `Upgrades`); match `git log -10 --format=%s`.
+- Name the thing changed, not the activity: `Adds membership certificate
   endpoint to gbf_merkurius.`, not `Worked on API stuff.`
-- Aim for 72 characters or fewer before the ticket reference. Move detail to
-  the body instead of stretching the subject.
+- Max ~72 characters before the ticket reference; put detail in the body.
 
 ### Ticket reference
 
-- Append `[touch:<TICKET_ID>]` to the subject. It links the commit to the
-  ticket in Codebase (see the `codebasehq-tickets` skill).
-- Write it exactly as `[touch:882]`: no space after the colon, one space before
-  the bracket.
-- Find the ticket id in the branch name (`882-merkurius-api-integration` means
-  `882`). If the branch has no number and the user has not given one, ask
-  instead of guessing. Housekeeping commits with no ticket may omit the
-  reference.
+- Exactly `[touch:882]`: one space before the bracket, none after the colon.
+  It links the commit to the Codebase ticket (see `codebasehq-tickets`).
+- Take the id from the branch name (`882-merkurius-api-integration` -> `882`).
+  If there's no number and the user gave none, ask. Housekeeping commits
+  without a ticket may omit it.
 
 ### Body
 
-Add a body when the diff does not explain itself. Skip it for trivial changes.
+Only when the diff doesn't explain itself.
 
-- Explain **why**, and the decisions a reader of the diff cannot see:
-  constraints, rejected alternatives, behaviour that is intentionally absent.
-- Write prose paragraphs. Use a list only for enumerations, such as the
-  package versions of a dependency update (`drupal/core 11.4.5 => 11.4.7`).
-- Mention operational consequences: new Composer dependencies, config that
-  must be imported, files outside version control that an environment needs,
-  commands added.
-- Do not repeat what `git diff` shows line by line.
+- Explain **why** and what the diff can't show: constraints, rejected
+  alternatives, intentionally absent behaviour.
+- Prose; lists only for enumerations (e.g. `drupal/core 11.4.5 => 11.4.7`).
+- Mention operational consequences: new Composer dependencies, config to
+  import, untracked files an environment needs, new commands.
+- Don't restate the diff.
 
 ## Workflow
 
-1. Run `git status` and `git diff --staged`. If nothing is staged, ask what to
-   include rather than staging everything.
-2. Take the ticket id from `git branch --show-current`.
-3. Write the message. One logical change per commit; if the staged diff mixes
-   unrelated changes, say so and suggest splitting it.
-4. Pass multi-line messages with a heredoc or several `-m` flags so newlines
-   survive.
+1. `git status` and `git diff --staged`. If nothing is staged, ask what to
+   include; don't stage everything.
+2. Get the ticket id from `git branch --show-current`.
+3. One logical change per commit; if the diff mixes unrelated changes, suggest
+   splitting.
+4. Use a heredoc or several `-m` flags for multi-line messages.
 
 ## Do not
 
-- Do not use Conventional Commits prefixes (`feat:`, `fix:`), emoji, or a
-  trailing ticket id without the `[touch:...]` brackets.
-- Do not use `--no-verify`, and do not amend or force-push commits that are
-  already pushed unless the user asks.
-- Do not add attribution trailers yourself. The harness adds them when it is
-  configured to.
+- Use Conventional Commits prefixes, emoji, or a ticket id without
+  `[touch:...]`.
+- Use `--no-verify`, or amend/force-push pushed commits unless asked.
+- Add attribution trailers yourself; the harness does when configured.
 
 ## Examples
-
-Small change, no body needed:
 
 ```
 Update MkDocs site name to "Glasbranschföreningen" in configuration. [touch:882]
 ```
-
-Change that needs the reason explained:
 
 ```
 Fixes the type of the membership organization number. [touch:882]
@@ -88,8 +72,6 @@ the specification, but it was mapped as a string. This made
 `dr merkurius:memberships:organizations` fail with a TypeError against
 the test API. The test data now uses the real type.
 ```
-
-Dependency update with a list:
 
 ```
 Security update drupal/paragraphs 1.20.0 => 1.23.0. [touch:877]

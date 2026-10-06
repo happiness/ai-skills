@@ -5,58 +5,42 @@ description: Names git branches in the company style - the Codebase ticket id fo
 
 # Git branch naming
 
-## Format
-
-```
-<TICKET_ID>-<short-description>
-```
-
-- `TICKET_ID` is the Codebase ticket number, digits only.
-- `short-description` is lowercase English, words separated by single hyphens.
-- Example: `882-merkurius-api-integration`.
-
-The ticket id comes first so branches sort by ticket and so the commit
-reference `[touch:<TICKET_ID>]` can be derived from the branch name (see the
-`commit-messages` skill).
+Format: `<TICKET_ID>-<short-description>`, e.g. `882-merkurius-api-integration`.
+The id comes first so branches sort by ticket and the commit reference
+`[touch:<TICKET_ID>]` can be derived from it (see `commit-messages`).
 
 ## Rules
 
-- Use two to five words that describe the ticket's goal, not the
-  implementation: `885-drupal-core-update`, not `885-run-composer-update`.
-- Only `a-z`, `0-9` and `-`. Transliterate Swedish letters (`å`, `ä` -> `a`,
-  `ö` -> `o`) and drop punctuation. No spaces, underscores, slashes or
-  uppercase.
-- No `ticket-` prefix, no `feature/` or `fix/` prefix, and no developer name.
-  Older `ticket-NNN` branches exist in the history; do not copy that style.
-- Aim for 40 characters or fewer in total.
-- One branch per ticket. Related follow-up work on the same ticket stays on the
-  same branch.
-- Branch from `master`/`main` unless the user names another base.
+- `TICKET_ID`: Codebase ticket number, digits only.
+- Description: two to five lowercase English words describing the goal, not the
+  implementation (`885-drupal-core-update`, not `885-run-composer-update`).
+- Only `a-z`, `0-9`, `-`. Transliterate `å`/`ä` -> `a`, `ö` -> `o`; drop
+  punctuation.
+- No `ticket-`, `feature/` or `fix/` prefix, no developer name (older
+  `ticket-NNN` branches exist; don't copy them).
+- Aim for 40 characters or fewer.
+- One branch per ticket; follow-up work stays on it.
+- Branch from `master`/`main` unless told otherwise.
 
 ## Finding the ticket id
 
-1. Use the number if the user gave one.
-2. Otherwise, if the user describes a ticket by title, look it up with the
-   Codebase tools (see the `codebasehq-tickets` skill). The project permalink
-   is `gbf`.
-3. If there is no ticket, ask. Do not invent a number. Only if the user
-   confirms the work has no ticket, use a plain description such as
-   `document-search`, as `master`, `dev` and `redesign` already do.
+1. Use the number the user gave.
+2. If they gave a title, look it up with the Codebase tools (see
+   `codebasehq-tickets`); the project permalink is `gbf`.
+3. If there's no ticket, ask; never invent a number. Only if the user confirms
+   there is none, use a plain description like `document-search`.
 
-## Creating the branch
+## Creating and renaming
 
 ```bash
 git switch -c 882-merkurius-api-integration master
 ```
 
-Run `git status` first. If there are uncommitted changes, tell the user
-instead of carrying them onto the new branch silently. Do not push or set
-upstream unless asked.
+Run `git status` first; if there are uncommitted changes, tell the user rather
+than silently carrying them over. Don't push or set upstream unless asked.
 
-## Renaming
-
-Rename a local branch with `git branch -m <new-name>`. If the old name was
-already pushed, say so, and leave deleting the remote branch to the user.
+Rename with `git branch -m <new-name>`. If the old name was pushed, say so and
+leave deleting the remote branch to the user.
 
 ## Examples
 
