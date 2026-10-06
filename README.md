@@ -9,6 +9,8 @@ with a `SKILL.md`.
 | Skill | Description |
 | --- | --- |
 | `codebasehq-tickets` | Create and update CodebaseHQ tickets through the Codebase MCP tools. |
+| `commit-messages` | Write git commit messages in the company style: an English summary sentence, a Codebase ticket reference such as `[touch:882]`, and an optional body. |
+| `git-branch-naming` | Name git branches after the Codebase ticket id plus a short kebab-case description, such as `882-merkurius-api-integration`. |
 
 ## Installation
 
