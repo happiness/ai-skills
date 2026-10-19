@@ -8,15 +8,17 @@ with a `SKILL.md`.
 
 | Skill | Description |
 | --- | --- |
-| `tracker-tickets` | Find, create and update tickets in Tracker through its MCP tools, with references such as `KIP#123` and internal comments where clients must not read along. |
+| `tracker-tickets` | Find, triage, create and update tickets in Tracker through its MCP tools: search, comments, files, internal notes where clients must not read along, references such as `KIP#123`, and telling a ticket what was done. |
+| `tracker-time` | Report and check staff time in Kimai through Tracker: log a day's time from what was worked on (git and Tracker), check and correct entries, My day. |
+| `tracker-planning` | Milestones and the backlog in Tracker: plan a delivery, see where it stands, complete it with release notes, and leave projects one no longer works in. |
 | `commit-messages` | Write git commit messages in the company style: an English summary sentence, a Tracker ticket reference such as `[GBF#882]`, and an optional body. |
 | `git-branch-naming` | Name git branches after the Tracker ticket number plus a short kebab-case description, such as `882-merkurius-api-integration`. |
 
-Version 2 is for Tracker, Happiness's replacement for CodebaseHQ: the ticket skill uses Tracker's MCP server and commits
+Version 2 is for Tracker, Happiness's replacement for CodebaseHQ: the Tracker skills use its MCP server and commits
 reference tickets as `[GBF#882]`, which Tracker links to the ticket. Version 1 (`^1.0`, branch `main`) is the CodebaseHQ
 version with `[touch:882]`, for projects that still use Codebase.
 
-The ticket skill needs Tracker's MCP server connected in the AI client, with a personal token from Tracker's Settings ›
+The Tracker skills need Tracker's MCP server connected in the AI client, with a personal token from Tracker's Settings ›
 AI access (described in Tracker's documentation, Guide › AI assistants).
 
 ## Installation

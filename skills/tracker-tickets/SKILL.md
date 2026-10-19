@@ -1,77 +1,93 @@
 ---
 name: tracker-tickets
-description: Creates, finds and updates tickets in Tracker, Happiness's ticket system, through its MCP tools (search_tickets, get_ticket, create_ticket, update_ticket, add_note). Use when asked to open, file, look up, update, comment on, close or reassign a ticket, or to write ticket descriptions and comments, including references such as KIP#123.
+description: Finds, creates and updates tickets in Tracker, Happiness's ticket system, through its MCP tools (search_tickets, get_ticket, get_ticket_notes, create_ticket, update_ticket, add_note, add_attachment, get_attachment). Use when asked to open, file, look up, triage, update, comment on, close or reassign a ticket, attach or read a file on one, summarise where a project's tickets stand, or write ticket text with references such as KIP#123.
 ---
 
 # Tracker tickets
 
-Tickets live in Tracker (Happiness's replacement for CodebaseHQ) and are managed through its MCP server, usually
-connected as `tracker` (tools `mcp__tracker__*`). If the tools are missing, the user connects them with a personal
-token from Tracker's Settings › AI access:
+Tickets live in Tracker (Happiness's replacement for CodebaseHQ), reached through its MCP server, usually connected as
+`tracker` (tools `mcp__tracker__*`). If the tools are missing, the user connects them with a personal token from
+Tracker's Settings › AI access:
 `claude mcp add --transport http tracker https://<tracker host>/mcp --header "Authorization: Bearer trk_…"`.
 Load deferred tool schemas with ToolSearch before calling.
 
-The tools act as the person whose token it is, with exactly their permissions: clients see no internal tickets or
-notes and can only comment and change status and assignee; staff can change every field. A read-only token cannot
-write at all. Every change is recorded in the ticket's history, marked "via MCP".
+The tools act as the token's owner with exactly their permissions. **Clients** see no internal tickets or notes, and
+may comment and change status and assignee where their membership allows writing. **Staff** change every field. A
+read-only token cannot write. Every change is in the ticket's history, marked "via MCP". Milestones and the backlog are
+in `tracker-planning`; time in `tracker-time`.
 
-## Workflow
+## Finding things
 
-1. **Find the project.** `list_projects` gives each project's **prefix** (2 to 4 characters, such as `KIP`) and key.
-   Pass either as `project`; never guess it. A ticket is then `project` + `number`.
-2. **Look before writing.** For an update, `get_ticket` (and `get_ticket_notes` if history matters). For a new
-   ticket, look for duplicates with `search_tickets` (the search-box language: words plus `status:open`,
-   `assignee:me`, `type:bug`, `milestone:"Rel 2"`, `not-status:closed`, `sort:updated_at`).
-3. **Use valid names.** Status, type, priority, category, milestone, tags and work package take *names*, matched
-   without regard to case; `get_lookups` lists what the project allows. A status change must follow the project's
-   workflow. `assignee` is an email address, a full name or `me` (`get_project_users`); only Happiness staff can be
-   assigned. With more than one work package, `create_ticket` needs `work_package`.
-4. **Create:** `create_ticket` with `summary` (one line) and `description` (Markdown, see below). Staff may also set
-   status, assignee, estimate, `subtask_of` and `internal`.
-5. **Update:** `update_ticket` with `project`, `number` and only the fields that change; `comment` adds a comment in
-   the same call. An empty string clears a field (not status). A comment alone: `add_note` with `body`.
-6. **Report back** with the reference (`KIP#123`) and what changed.
+- `list_projects`: every project's **prefix** (2 to 4 characters, `KIP`) and key. Pass either as `project`; never
+  guess. A ticket is `project` + `number`, written `KIP#123`.
+- `search_tickets`: the search-box language. Words search subjects and comments; filters: `status:open`
+  (`closed`, `waiting` = waiting for the client, or a name), `assignee:me|none|<name>`, `reporter:`, `watcher:me`,
+  `type:`, `priority:high,critical` (comma = any of), `category:`, `milestone:"Rel 2"|none`, `tag:`,
+  `workpackage:`, `project:KIP`, `blocked:yes`, `backlog:yes`, `private:yes` (staff), `created:<30d`,
+  `updated:>2026-09-01`, `not-status:closed` (or `-status:closed`), `sort:updated_at order:desc`. Up to 50 per page.
+- `get_ticket`: fields, description, relationships and sub-tasks. `get_ticket_notes`: comments and changes, oldest
+  first (paged), with attachment ids and commits that mention the ticket.
+- `get_lookups`: the project's statuses (and which close a ticket), types, priorities, categories, tags, active
+  milestones and work packages. `get_project_users`: who can be mentioned or assigned.
 
-Tickets and comments are seen by the team and often by the client, and cannot be cleanly taken back. Show the user the
-text and get a go-ahead before `create_ticket`, `update_ticket` or `add_note`, unless they asked for exactly that text.
+## Writing
+
+1. **Look first.** Before an update, read the ticket (and its notes if history matters). Before creating, search for
+   a duplicate.
+2. **Create:** `create_ticket` with `summary` (one line) and `description`. Everyone may set type, priority,
+   category, milestone, tags, start and deadline; staff also status, assignee, estimate, `internal` and `subtask_of`
+   (a sub-task's parent number; one level only). With more than one work package, `work_package` is required.
+3. **Update:** `update_ticket` with only the fields that change, and `comment` for a comment in the same call. An
+   empty string clears a field (never status). Status changes follow the project's workflow; assignees are Happiness
+   staff (email, full name or `me`). Names are matched without regard to case.
+4. **Comment:** `add_note` with `body`. **Files:** `add_attachment` (base64, up to 50 MB, as a new comment);
+   `get_attachment` reads one by its id.
+5. **Report back** with the reference and what changed.
+
+A **closed** ticket takes no comments or files; changing its status to an open one re-opens it. Relationships
+(blocks, duplicates, relates to …) cannot be set through MCP: say which ones to add in the web page.
+
+Tickets and comments are read by the team and often the client and cannot be cleanly withdrawn. Show the text and get
+a go-ahead before any write, unless the user asked for exactly that text.
 
 ## Internal or public
 
-Clients who are members of the project read every public comment and ticket. Anything about other clients, prices,
-estimates, staff matters or work the client should not see goes in an **internal** comment (`internal: true` in
-`add_note`, `internal_comment: true` in `update_ticket`) or an internal ticket (`internal: true`), which only staff can
-set. When unsure, ask. Write in the language the ticket is already written in.
+Clients who are members read every public ticket and comment. Other clients, prices, estimates, staff matters and
+anything the client should not see go in an **internal** comment (`internal: true` in `add_note` and
+`add_attachment`, `internal_comment: true` in `update_ticket`) or an internal ticket (`internal: true`); only staff can
+set it. When unsure, ask. Write in the language the ticket is already written in.
 
-## Writing in Tracker
+## Tracker's Markdown
 
-GitHub-flavoured Markdown: headings, lists, tables, task lists (`- [ ]`), fenced code with highlighting,
-strikethrough; a single line break stays a line break, and raw HTML is shown as text.
+GitHub-flavoured: headings, lists, tables, task lists (`- [ ]`), fenced code with highlighting, strikethrough; one
+line break stays a line break; raw HTML shows as text.
 
 | Purpose | Write |
 | --- | --- |
-| Another ticket | `KIP#123`, with the project's prefix, also in the same project; never `#123` alone, `kip-123` or a URL |
-| A person | `@handle` (the name before the @ of their address); they are notified and start following the ticket |
-| A branch, commit or merge request | Plain text in backticks (`` `882-new-export` ``, `` `3e459c1` ``) or a link; Tracker shows commits and merge requests that mention a ticket in the ticket's Code box (staff only) |
-| An image | Attach it (`add_attachment`); images linked from other servers are not shown |
+| Another ticket | `KIP#123`, with the prefix, also in the same project; never a bare `#123`, `KIP-123` or a URL |
+| A person | `@handle` (the part before the @ of their address); they are notified and start following |
+| Branch, commit, merge request | Backticks (`` `882-new-export` ``, `` `3e459c1` ``) or a link; commits that mention a ticket appear on it by themselves (staff only) |
+| An image | Attach it; images linked from other servers are not shown |
+| A callout | `> **Note:** …` |
 
-Codebase markup such as `{branch:repo/name}`, `{commit:repo/sha}`, `{tag:…}` and `Note:` blocks does not exist in
-Tracker; use the above, or a blockquote (`> **Note:** …`) for a callout.
+Codebase markup (`{branch:…}`, `{commit:…}`, `{tag:…}`, `Note:` blocks) does not exist in Tracker.
 
-Example description:
+## Workflows
 
-```markdown
-## Problem
+**Triage new tickets** (staff). `search_tickets` with `status:open assignee:none sort:created_at order:asc` (add
+`project:`). For each: read it, check for a duplicate, and propose type, priority, category, assignee and milestone
+or backlog, plus a question to the reporter if something is missing. Present all proposals as one table; apply only
+what the user approves, one `update_ticket` per ticket.
 
-Old /student/ aliases still resolve after the migration.
+**Where a project stands.** Open tickets by status and assignee (`project:KIP status:open`), those waiting for the
+client (`status:waiting`), blocked ones (`blocked:yes`), the oldest unanswered, and changes in the last week
+(`updated:<7d`). A short summary with references; nothing is written.
 
-> **Note:** Blocked until the client confirms the pathauto patterns.
+**Tell the ticket what was done.** After work on a branch (`882-…`): read the ticket, summarise the change from
+`git log` and the diff in plain words for the people on the ticket (what changed for them, how to test, anything left),
+and propose a comment, and a status change if the workflow has one for it (such as Testing). Commits already show on
+the ticket for staff; the comment is for everyone else. Internal details go in an internal comment.
 
-## Work
+## Related
 
-Done on the branch `3901-purge-old-aliases`. Related to KIP#3864.
-```
-
-## Related conventions
-
-- Branches: `<number>-<short-description>`, e.g. `3901-purge-old-aliases` (see `git-branch-naming`).
-- Commit subjects end with `[KIP#3901]` (see `commit-messages`).
+- Milestones and the backlog: `tracker-planning`; time: `tracker-time`; branch names: `git-branch-naming`; commit messages: `commit-messages`.
